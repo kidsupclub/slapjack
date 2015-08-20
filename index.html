@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>nodejs chat</title>
+<script src="/socket.io/socket.io.js"> </script>
+</head>
+<body>
+<h1>chat</h1>
+Your name: <input id="name" type = "text" />
+<br/>
+<br/>
+<br/>
+<input id = "box" type="text">
+<button onclick = "send();">Send</button>
+<div id = "tweets"> <img id='card' src='sjsjsjsj'/></div> <br>
+<button id = 'play' onclick = 'play();'>Play</button>
+<p id = 'result'></p>
+
+
+
+<script>
+    var socket = io();
+    var name="";
+    function send() {
+        if (name == "") {
+            name = document.getElementById("name").value;
+            document.getElementById("name").disabled = true;
+
+        }
+        var msg = name + " says: " + document.getElementById("box").value;
+        socket.emit('twee', msg);
+    }
+
+    socket.on('twee', function(data){
+        //document.getElementById("tweets").innerHTML += "<br>" + data;
+
+    });
+    socket.on('deal', function(data){
+        var img1 = document.getElementById('card');
+        console.log("/img/" + data['card']);
+        img1.src = "/images/" + data['card'];
+    });
+
+    socket.on('winner', function(data){
+        document.getElementById('result').innerHTML = data
+    });
+
+    function play(){
+        socket.emit('play',{});
+    };
+
+</script>
+</body>
+</html>
