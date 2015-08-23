@@ -56,7 +56,9 @@ client.on('register', function(data){
 
 
 });
-server.listen(8080, function () {
+
+var port = Number(process.env.PORT || 8080);
+server.listen(port, function () {
     console.log('listening...');
 });
 
