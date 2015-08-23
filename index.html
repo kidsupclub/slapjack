@@ -1,54 +1,47 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>nodejs chat</title>
-<script src="/socket.io/socket.io.js"> </script>
+<title>Slapjack</title>
+<canvas id='drawcard' width="600" height="400"></canvas>
+<script src="/socket.io/socket.io.js"> var client=io(); </script>
+    <style>
+        body {background-color:lightblue}
+        h1   {color:forestgreen}
+        p    {color:green}
+    </style>
 </head>
 <body>
-<h1>chat</h1>
-Your name: <input id="name" type = "text" />
-<br/>
-<br/>
-<br/>
-<input id = "box" type="text">
-<button onclick = "send();">Send</button>
-<div id = "tweets"> <img id='card' src='sjsjsjsj'/></div> <br>
-<button id = 'play' onclick = 'play();'>Play</button>
-<p id = 'result'></p>
-
-
-
+<h1 style="font-family:trebuchet MS">Register</h1>
+Your name: <input id="name">
+<button id = 'register' onclick='register()'> Register</button>
 <script>
-    var socket = io();
-    var name="";
-    function send() {
-        if (name == "") {
-            name = document.getElementById("name").value;
-            document.getElementById("name").disabled = true;
-
-        }
-        var msg = name + " says: " + document.getElementById("box").value;
-        socket.emit('twee', msg);
+    var client=io();
+    var ctx = document.getElementById('drawcard').getContext('2d');
+    var hiddenCard = new Image();
+    hiddenCard.src = '/images/b1fv.png';
+    function register(){
+        var name = document.getElementById('name').value;
+        client.emit('register', {player:name});
     }
-
-    socket.on('twee', function(data){
-        //document.getElementById("tweets").innerHTML += "<br>" + data;
+    client.on('announce', function(data){
+        //console.log(data);
+        document.getElementById('status').innerHTML+= '<br>' + data;
 
     });
-    socket.on('deal', function(data){
-        var img1 = document.getElementById('card');
-        console.log("/img/" + data['card']);
-        img1.src = "/images/" + data['card'];
+    client.on('deal',function (data){
+        console.log(data);
+        for(var i=0; i < data.players.length; i +=2){
+            for(var j=0; j < data.players[i+1]; j +=1){
+                ctx.drawImage(hiddenCard, 10 + 10 * j, 10 + i*100)
+
+            }
+        }
+    /*for(var k = 0; k < data.pile.length){
+        var img = new Image
+    }*/
+
     });
-
-    socket.on('winner', function(data){
-        document.getElementById('result').innerHTML = data
-    });
-
-    function play(){
-        socket.emit('play',{});
-    };
-
 </script>
+<div id='status'> </div>
 </body>
 </html>
