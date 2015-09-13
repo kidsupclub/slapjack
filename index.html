@@ -1,75 +1,98 @@
 <!DOCTYPE html>
 <html>
-<head>
-<title>Slapjack</title>
-<canvas id='drawcard' width="600" height="400" onclick = 'play()'></canvas>
-<script src="/socket.io/socket.io.js"> var client=io(); </script>
-    <style>
-        body {background-color:lightblue}
-        h1   {color:forestgreen}
-        p    {color:green}
-    </style>
-</head>
-<body>
-<h1 style="font-family:trebuchet MS">Register</h1>
-Your name: <input id="name">
-<button id = 'register' onclick='register()'> Register</button>
-<script>
-    function play(){
-        console.log(my_name+" played.");
-        //if(my_name == active_player){
-        client.emit('play', my_name);
-        //}
-    }
-    var my_name;
-    var cards = ['1.png', '2.png', '3.png', '4.png', '5.png', '6.png', '7.png', '8.png', '9.png', '10.png', '11.png', '12.png', '13.png', '14.png', '15.png', '16.png', '17.png', '18.png', '19.png', '20.png', '21.png', '22.png', '23.png', '24.png', '25.png', '26.png', '27.png', '28.png', '29.png', '30.png', '31.png', '32.png', '33.png', '34.png', '35.png', '36.png', '37.png', '38.png', '39.png', '40.png', '41.png', '42.png', '43.png', '44.png', '45.png', '46.png', '47.png', '48.png', '49.png', '50.png', '51.png', '52.png'];
-    var active_player;
-    var cardImages = {};
-        for(var i=0; i<cards.length; i++){
-            var img = new Image();
-            img.src='/images/' + cards[i];
-            cardImages[cards[i]] = img;
-        }
-    var client=io();
-    var ctx = document.getElementById('drawcard').getContext('2d');
-    var hiddenCard = new Image();
-    hiddenCard.src = '/images/b1fv.png';
-    function register(){
-        my_name = document.getElementById('name').value;
-        client.emit('register', {player:my_name});
-        console.log("emit register msg for "+my_name)
-    }
-    client.on('announce', function(data){
-        //console.log(data);
-        document.getElementById('status').innerHTML+= '<br>' + data;
+	<head>
+		<title>slapjack</title>
+		
+		<script src = "/socket.io/socket.io.js"></script>
+		
+	</head>
+	<body>
+		<div>
+			<input id = 'name' />
+			<button id = 'reg' onclick = 'register()'>Register</button>
+		</div>
+		
+		<canvas id = 'canvas1' width = '1000' height = '500' onclick = 'play()'></canvas>
+		
+		<div id = 'status'></div>
+		
+		<script>
+		
+			var ctx = document.getElementById('canvas1').getContext('2d');
+			var client = io();
+			var my_name;
+			var newCards = ["0CU","0DU","0HU","0SU","2CU","2DU","2HU","2SU","3CU","3DU","3HU","3SU","4CU","4DU","4HU","4SU","5CU","5DU","5HU","5SU","6CU","6DU","6HU","6SU","7CU","7DU","7HU","7SU","8CU","8DU","8HU","8SU","9CU","9DU","9HU","9SU","ACU","ADU","AHU","ASU","JCU","JDU","JHU","JSU","QCU","QDU","QHU","QSU","KCU","KDU","KHU","KSU"]
+			var active_player;
+			var cardImages = {};
+			var slap_enable = 0;
 
-    });
-    client.on('deal', function (data){
-        console.log(data);
-
-        ctx.clearRect(0, 0, 600, 400);
-
-        //draw hands
-        for(var i=0; i < 4; i +=2){
-            for(var j=0; j < data.players[i+1]; j +=1){
-                ctx.drawImage(hiddenCard, 10 + 10 * j, 10 + i * 100)
-
-            }
-        }
-
-        //draw pile
-        var x_offset = 10;
-        for(var i=0; i<data.pile.length; i++){
-            x_offset += 10;
-            var img = new Image();
-            var cardname =  data.pile [i];
-            var img = cardImages[cardname];
-            console.log(img);
-            ctx.drawImage(img, 10 + 50 * i, 110);
-        }
-        active_player = data.active_player;
-    });
-</script>
-<div id='status'> </div>
-</body>
+			for(var e = 0; e < newCards.length; e++){
+			
+				var img2 = new Image();
+				img2.src = '/cards/' + newCards[e] + '.png';
+				cardImages[newCards[e]] = img2;
+				console.log(newCards[e]);
+			
+			}
+			
+			function register() {
+			
+				my_name = document.getElementById('name').value;
+				client.emit('register', {player:my_name});
+			
+			}
+			
+			function play() {
+			
+				if(my_name == active_player || slap_enable == 1){
+					console.log('active');
+					client.emit('play', my_name);
+				
+				}
+			
+			}
+			
+			client.on('announce', function(data){
+			
+				console.log(data);
+				document.getElementById('status').innerHTML += '<br>' + data;
+			
+			});
+			
+			var hiddenCard = new Image();
+			hiddenCard.src = '/cards/DDD.png';
+			
+			client.on('deal', function(data){
+				slap_enable = data.slap_enable;
+			
+				ctx.clearRect(0, 0, 1000, 500);
+			
+				for(var i = 0; i < data.players.length; i += 2){
+					
+					for(var j = 0; j < data.players[i + 1]; j++){
+					
+						ctx.drawImage(hiddenCard, 10 + 30*j, 10 + i*100);
+					
+					}
+				
+				}
+				
+				var x_offset = 10;
+				
+				for(var j = 0; j < data.pile.length; j++){
+			
+					var img1 = new Image();
+					img1.src = '/cards/' + data.pile[j] +'.png';
+					x_offset += 15;
+					ctx.drawImage(img1, x_offset, 110);
+					img = cardImages[data.pile[i]];
+					
+				}
+				
+				active_player = data.active_player;
+			
+			});
+			
+		</script>
+	</body>
 </html>
