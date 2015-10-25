@@ -1,9 +1,7 @@
 <!DOCTYPE html>
-
-<!-- test git sean -->
-<html>
+<html>   
 	<head>
-		<title>slapjack</title>
+		<title>Avez-vous de la chance?</title>
 		
 		<script src = "/socket.io/socket.io.js"></script>
 		
@@ -27,14 +25,18 @@
 			var active_player;
 			var cardImages = {};
 			var slap_enable = 0;
+			var layout = [
+				{ xmin : 100, xmax : 400, ymin :  10, ymax :  10 },
+				{ xmin : 100, xmax : 400, ymin : 350, ymax : 350 },
+				{ xmin :  10, xmax :  10, ymin : 100, ymax : 250 },
+				{ xmin : 490, xmax : 490, ymin : 100, ymax : 250 }
+			];
 
 			for(var e = 0; e < newCards.length; e++){
 			
 				var img2 = new Image();
 				img2.src = '/cards/' + newCards[e] + '.png';
 				cardImages[newCards[e]] = img2;
-				console.log(newCards[e]);
-			
 			}
 			
 			function register() {
@@ -46,55 +48,86 @@
 			
 			function play() {
 			
-				if(my_name == active_player || slap_enable == 1){
-					console.log('active');
+				if(my_name == active_player || slap_enable == 1) {
 					client.emit('play', my_name);
 				
 				}
 			
 			}
-			
+
 			client.on('announce', function(data){
-			
+
 				console.log(data);
 				document.getElementById('status').innerHTML += '<br>' + data;
 			
 			});
-			
-			var hiddenCard = new Image();
-			hiddenCard.src = '/cards/DDD.png';
-			
-			client.on('deal', function(data){
+
+			client.on('slap_win', function(data){
+				if(my_name == data){
+					document.getElementById('slap_snd').play();
+				} else{
+					document.getElementById('lose_snd').play();
+				}
+			});
+
+			client.on('game_win', function(data) {
+				if (my_name == data) {
+					document.getElementById('win_snd').play();
+				} else {
+					document.getElementById('lose_snd').play();
+				}
+
+			});
+			client.on('deal', function(data) {
+				var hiddenCard = new Image();
+				hiddenCard.src = '/cards/DDD.png';
+console.log(data);
+
 				slap_enable = data.slap_enable;
-			
+				active_player = data.active_player;
+
+
+
 				ctx.clearRect(0, 0, 1000, 500);
-			
-				for(var i = 0; i < data.players.length; i += 2){
-					
-					for(var j = 0; j < data.players[i + 1]; j++){
-					
-						ctx.drawImage(hiddenCard, 10 + 30*j, 10 + i*100);
-					
+
+				var player_list = Object.keys(data.player_list);
+
+				for(var i = 0; i < player_list.length; i++){
+
+					var length = data.player_list[player_list[i]];
+
+					var pos = layout[i];
+					var xstart = pos.xmin;
+					var ystart = pos.ymin;
+					var xdelta = (pos.xmax - pos.xmin) / length;
+					var ydelta = (pos.ymax - pos.ymin) / length;
+
+					for(var j = 0; j < length; j++) {
+	
+						ctx.drawImage(hiddenCard, xstart + j * xdelta, ystart + j * ydelta);
+
 					}
-				
 				}
 				
-				var x_offset = 10;
+				var x_offset = 100;
+				var y_offset = 200;
 				
 				for(var j = 0; j < data.pile.length; j++){
 			
 					var img1 = new Image();
 					img1.src = '/cards/' + data.pile[j] +'.png';
 					x_offset += 15;
-					ctx.drawImage(img1, x_offset, 110);
+					ctx.drawImage(img1, x_offset, y_offset);
 					img = cardImages[data.pile[i]];
 					
 				}
-				
-				active_player = data.active_player;
-			
 			});
-			
+
+
 		</script>
+	<audio id = 'slap_snd' src = 'audios/Yay3.mp3'> </audio>
+	<audio id = 'win_snd' src = 'audios/SlapJackWin.mp3'> </audio>
+	<audio id = 'bk_snd' src = 'audios/bkgrndmusic.mp3' autoplay loop> </audio
+	<audio id = 'lose_snd' src = 'audios/lose.mp3'> </audio>
 	</body>
 </html>
