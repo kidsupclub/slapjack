@@ -206,8 +206,8 @@ socket.on('connection', function(client) {
 
     app.use(express.static('.'));
 
-    server.listen(8080, function () {
+    var port = Number(process.env.PORT || 8080);
 
-        console.log('listening...');
-
-    });
+	server.listen(port, function(){
+	    console.log('listening...');
+	});
