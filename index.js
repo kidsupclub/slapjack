@@ -2,8 +2,6 @@ var express = require('express');
 var http = require('http');
 var io = require('socket.io');
 
-require('waitfor')
-
 var app = express();
 var server = http.Server(app);
 var socket = io(server);
