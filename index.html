@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>   
+<html>
 	<head>
 		<title>Avez-vous de la chance?</title>
 		
@@ -14,8 +14,13 @@
 		
 		<canvas id = 'canvas1' width = '1000' height = '500' onclick = 'play()'></canvas>
 		
-		<div id = 'status'></div>
+		<div id = 'status' width = '100%' height = '100' overflow-y: 'scroll'></div>
 		
+		<audio id = 'slapsound' src = 'audio/clap.wav'></audio>
+		<audio id = 'winsound' src = 'audio/win.mp3'></audio>
+		<audio id = 'losesound' src = 'audio/lose.mp3'></audio>
+		<!--audio id = 'bgsound' src = 'audio/background.mp3' autoplay loop><audio-->
+			
 		<script>
 		
 			var ctx = document.getElementById('canvas1').getContext('2d');
@@ -25,6 +30,7 @@
 			var active_player;
 			var cardImages = {};
 			var slap_enable = 0;
+			
 			var layout = [
 				{ xmin : 100, xmax : 400, ymin :  10, ymax :  10 },
 				{ xmin : 100, xmax : 400, ymin : 350, ymax : 350 },
@@ -49,44 +55,60 @@
 			function play() {
 			
 				if(my_name == active_player || slap_enable == 1) {
+				
 					client.emit('play', my_name);
 				
 				}
 			
 			}
-
+			
 			client.on('announce', function(data){
-
-				console.log(data);
+				
 				document.getElementById('status').innerHTML += '<br>' + data;
 			
 			});
-
+			
 			client.on('slap_win', function(data){
-				if(my_name == data){
-					document.getElementById('slap_snd').play();
-				} else{
-					document.getElementById('lose_snd').play();
-				}
-			});
-
-			client.on('game_win', function(data) {
-				if (my_name == data) {
-					document.getElementById('win_snd').play();
+			
+				//                                                                                                                                                                                                                                                                                                                  document.getElementById('slapsound').play();
+				
+				//document.getElementById('winsound').play();
+				
+				if(my_name == data) {
+				
+					document.getElementById('winsound').play();
+				
 				} else {
-					document.getElementById('lose_snd').play();
+				
+					document.getElementById('losesound').play();
+				
 				}
-
+			
 			});
-			client.on('deal', function(data) {
-				var hiddenCard = new Image();
-				hiddenCard.src = '/cards/DDD.png';
-console.log(data);
+			
+			client.on('game_win', function(data){
+			
+				//document.getElementById('winso                                                                                                                                                                                                                                                                                                                                                   und').play();
+				
+				if(my_name == data) {
+				
+					document.getElementById('winsound').play();
+				
+				} else {
+				
+					document.getElementById('losesound').play();
+				
+				}                    
+			
+			});
+			
+			var hiddenCard = new Image();
+			hiddenCard.src = '/cards/DDD.png';
+			
+			client.on('deal', function(data){
 
 				slap_enable = data.slap_enable;
 				active_player = data.active_player;
-
-
 
 				ctx.clearRect(0, 0, 1000, 500);
 
@@ -122,12 +144,6 @@ console.log(data);
 					
 				}
 			});
-
-
 		</script>
-	<audio id = 'slap_snd' src = 'audios/Yay3.mp3'> </audio>
-	<audio id = 'win_snd' src = 'audios/SlapJackWin.mp3'> </audio>
-	<audio id = 'bk_snd' src = 'audios/bkgrndmusic.mp3' autoplay loop> </audio
-	<audio id = 'lose_snd' src = 'audios/lose.mp3'> </audio>
 	</body>
 </html>
